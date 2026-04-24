@@ -1,0 +1,39 @@
+---
+description: URL vs text classification rules for line-by-line ingestion
+globs: js/url-utils.js
+alwaysApply: false
+---
+
+# URL Detection Rules (`parseLineToRecord`)
+
+Lines from `.txt` and `.rtf` uploads are classified in strict order:
+
+## Rule 1 — Explicit `http://` or `https://` scheme → URL
+Parse with `new URL()`. If it throws or protocol is wrong → text.
+
+## Rule 2 — Any other explicit scheme → text
+`ftp:`, `mailto:`, `data:`, etc. are not web links.
+
+## Rule 3 — No scheme → URL only if hostname contains a dot
+```js
+const potentialHost = trimmed.split('/')[0].split('?')[0].split('#')[0];
+if (potentialHost.includes('.')) { /* try https:// prepend */ }
+```
+
+**Why the dot rule matters:**  
+`new URL('https://ariadna_cooper')` succeeds — the parser treats the whole word as a hostname. Without the dot check, bare usernames, names, and single words are mis-classified as URLs.
+
+| Input | Classified as |
+|-------|--------------|
+| `https://example.com` | URL ✓ |
+| `example.com/path` | URL ✓ (has dot) |
+| `ariadna_cooper` | Text ✓ (no dot) |
+| `Miss Dxxx` | Text ✓ (no dot, has space) |
+| `mailto:a@b.com` | Text ✓ (non-http scheme) |
+| `localhost` | Text ✓ (no dot — intentional) |
+
+## Do not relax this rule without updating tests
+Tests live in `js/url-utils.test.js`. Run with:
+```
+node --test js/url-utils.test.js
+```

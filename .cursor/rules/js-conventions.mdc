@@ -1,0 +1,54 @@
+---
+description: JavaScript conventions for Link Logger — DOM safety, modules, events
+globs: js/**/*.js
+alwaysApply: false
+---
+
+# JavaScript Conventions
+
+## No innerHTML for user data — always use DOM APIs
+
+```js
+// ❌ BAD — XSS risk
+el.innerHTML = `<a href="${row.url}">${row.description}</a>`;
+
+// ✅ GOOD
+const a = document.createElement('a');
+a.href = safeHttpUrl(row.url); // validate protocol first
+a.textContent = row.description;
+```
+
+## Validate URLs before setting href
+
+```js
+function safeHttpUrl(url) {
+  try {
+    const u = new URL(url);
+    if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
+  } catch {}
+  return null; // render as <span>, not <a>
+}
+```
+
+## Bind events in JS — no inline onclick attributes
+
+```js
+// ❌ BAD
+el.innerHTML = `<button onclick="deleteItem('${id}')">Delete</button>`;
+
+// ✅ GOOD
+btn.addEventListener('click', () => deleteItem(id));
+```
+
+## Async patterns
+- Use `void fn()` to fire-and-forget without suppressing lint warnings
+- Always `await` IndexedDB helpers — they all return Promises
+- Debounce filter input (~220 ms) to avoid re-render churn
+
+## Module structure
+Each file has one clear responsibility. Import only what is needed.
+Never import `main.js` from other modules — it is the leaf entry point.
+
+## Tests
+Run with: `node --test js/url-utils.test.js js/rtf.test.js`
+Add tests for any new parsing or grouping logic in `url-utils.js`.

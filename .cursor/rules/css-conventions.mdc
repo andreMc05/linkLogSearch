@@ -1,0 +1,70 @@
+---
+description: CSS conventions for Link Logger — variables, grid system, dark mode
+globs: css/**/*.css
+alwaysApply: false
+---
+
+# CSS Conventions
+
+## Always use CSS custom properties for colours and sizing
+
+All tokens are defined in `:root`. Never hard-code hex values or pixel sizes outside of `:root`.
+
+Key tokens:
+- `--bg`, `--surface`, `--text`, `--muted`, `--border`
+- `--accent`, `--accent-hover`, `--danger`, `--danger-hover`
+- `--control-height: 44px` — shared height for all inputs and buttons
+- `--radius: 10px` — card/modal border radius
+- `--shadow` — standard box shadow
+
+## Dark mode
+The app supports a user-controlled light/dark toggle stored in `localStorage` (`key: 'theme'`, values `'dark'` or `'light'`). `js/theme.js` sets a `data-theme` attribute on `<html>`.
+
+CSS rule:
+- `:root` — light defaults (always)
+- `@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { … } }` — auto dark (no user override)
+- `[data-theme="dark"] { … }` — explicit dark override (same token values as above)
+- `[data-theme="light"] { color-scheme: light; }` — force light browser chrome
+
+Never use class-based dark mode. Never hard-code theme colours outside `:root` / the `[data-theme]` blocks.
+
+## Controls panel — 3-column grid system
+
+All three rows of `.controls-panel` share `grid-template-columns: repeat(3, 1fr)`:
+- `.controls-inputs` — file picker | custom header | batch tags
+- `.controls-actions` — Upload Content | Export JSON | Clear all data
+- `.controls-filter` — flex row (single line): Import JSON + radios | search | clear
+
+Use `gap: 1px; background: var(--border)` on the grid to render hairline dividers between cells without double borders. Child cells get `background: var(--surface)`.
+
+## Group cards — CSS multi-column layout
+
+```css
+.groups {
+  column-count: 3;
+  column-gap: 0.75rem;
+}
+.group {
+  break-inside: avoid;   /* prevent a card from splitting across columns */
+  margin-bottom: 0.75rem;
+}
+```
+Expanding a card only shifts items below it in the **same column** — siblings in other columns are unaffected.
+Responsive: `column-count: 2` ≤ 860 px, `column-count: 1` ≤ 540 px.
+Order is column-major (fills col 1 top→bottom, then col 2, col 3).
+
+## Control sizing
+
+All interactive controls (`input`, `button`, `.chip-input`) must set:
+```css
+min-height: var(--control-height);
+box-sizing: border-box;
+```
+
+## `.group` uses container queries
+`.group` has `container-type: inline-size` so child rules can respond to card width.
+
+## Empty state spans all columns
+```css
+.empty-state { column-span: all; }
+```

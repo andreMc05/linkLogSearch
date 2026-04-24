@@ -1,0 +1,46 @@
+---
+description: Link Logger project overview — always-on context for every chat
+alwaysApply: true
+---
+
+# Link Logger — Project Overview
+
+Offline-first single-page app. No backend, no build step. Open via a local HTTP server (IndexedDB + ES modules require it).
+
+## Stack
+- Vanilla JS ES modules (`<script type="module">`) — no framework, no bundler
+- IndexedDB for persistence (`js/db.js`)
+- Plain CSS with custom properties (`css/style.css`)
+
+## File map
+| File | Role |
+|------|------|
+| `index.html` | Single page, all UI markup |
+| `css/style.css` | All styles — CSS variables, dark mode, grid layout |
+| `js/main.js` | Entry point — wires DOM, state, event listeners |
+| `js/db.js` | All IndexedDB reads/writes; UUID ids via `crypto.randomUUID` |
+| `js/render.js` | DOM-only list rendering (no `innerHTML` for user data) |
+| `js/url-utils.js` | Line parsing, filter logic, tag deduplication |
+| `js/import-export.js` | JSON import (merge/replace) and export with `schemaVersion` |
+| `js/rtf.js` | Best-effort RTF → plain text stripper |
+
+## Data model
+- **URL row**: `id`, `url` (normalized https), `originalLine`, `domain`, `path`, `description`, `customHeader`, `tags[]`
+- **Text row**: `id`, `content`, `description` (50-char preview), `tags[]`
+- **Tags store**: keyPath `name`; rebuilt after every mutation via `rebuildTagIndex()`
+
+## UI layout
+- **Controls panel** (card): 3-column CSS grid for all three rows — inputs / action buttons / filter row
+- **Browse tabs**: Links (grouped by domain) | Texts (grouped by exact content, unique/duplicate filter)
+- **Groups**: 3-column CSS grid (`repeat(3, 1fr)`), collapse to 2 col ≤ 860 px, 1 col ≤ 540 px
+- Groups default **collapsed**; map value `false` = expanded, missing/`true` = collapsed
+
+## Export format
+```json
+{ "schemaVersion": 1, "exportedAt": "ISO", "urls": [], "texts": [], "tags": [] }
+```
+
+## Duplicate rules (import merge)
+- URLs: same normalized `url` → union tags, skip insert
+- Texts: same trimmed `content` → union tags, skip insert
+- Replace mode: clear all first, then bulk insert

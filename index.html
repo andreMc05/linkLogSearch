@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Link Logger</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('theme');
+        if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="app-header-content">
+        <h1>Link Logger</h1>
+        <p>Offline-first URL and text log — IndexedDB in your browser.</p>
+      </div>
+      <button id="theme-toggle" type="button" class="btn btn-ghost theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </header>
+
+    <div id="toast-region" aria-live="polite" aria-relevant="additions"></div>
+
+    <main>
+      <div class="controls-panel">
+        <!-- Row 1: three equal inputs -->
+        <div class="controls-inputs">
+          <div class="field">
+            <label for="file-input">Files (.txt / .json / .rtf)</label>
+            <input
+              id="file-input"
+              type="file"
+              accept=".txt,.json,.rtf,text/plain,application/json,application/rtf,text/rtf"
+              multiple
+            />
+          </div>
+          <div class="field">
+            <label for="batch-header">Custom header (URLs, optional)</label>
+            <input id="batch-header" type="text" autocomplete="off" placeholder="e.g. Source: newsletter" />
+          </div>
+          <div class="field chip-input-wrap">
+            <label for="batch-tag-input">Batch tags (optional)</label>
+            <div id="batch-chip-box" class="chip-input">
+              <div id="batch-chips" class="chip-list"></div>
+              <input
+                id="batch-tag-input"
+                type="text"
+                autocomplete="off"
+                placeholder="Comma or Enter to add"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: three equal full-width buttons -->
+        <div class="controls-actions">
+          <button id="upload-btn" type="button" class="btn btn-primary">Upload Content</button>
+          <button id="export-btn" type="button" class="btn">Export JSON</button>
+          <button id="clear-all-btn" type="button" class="btn btn-danger">Clear all data</button>
+        </div>
+
+        <!-- Row 3: single row — import | radios | [flex filter] | clear -->
+        <div class="controls-filter">
+          <button id="import-json-btn" type="button" class="btn btn-sm">Import JSON…</button>
+          <input id="import-json-input" type="file" accept=".json,application/json" class="visually-hidden" />
+          <div class="import-mode" role="group" aria-label="JSON import mode">
+            <label class="import-mode__choice"
+              ><input type="radio" name="import-mode" value="merge" checked /> Merge</label
+            >
+            <label class="import-mode__choice"
+              ><input type="radio" name="import-mode" value="replace" /> Replace all</label
+            >
+          </div>
+          <input
+            id="filter-input"
+            type="search"
+            autocomplete="off"
+            placeholder="Search… or tag:name / domain:host"
+            class="filter-input"
+          />
+          <button id="clear-filter-btn" type="button" class="btn btn-sm btn-ghost">Clear filter</button>
+        </div>
+      </div>
+
+      <p id="filter-hint-links" class="filter-hint">
+        Links tab: use <code>tag:reading</code> for tag-only filter and <code>domain:github.com</code> for hostname match.
+      </p>
+      <p id="filter-hint-texts" class="filter-hint is-hidden">
+        Texts tab: entries are grouped by identical body text. The search box filters by content, tags, and description.
+      </p>
+
+      <div class="browse-bar" role="tablist" aria-label="Browse by type">
+        <button id="tab-links" type="button" class="browse-tab" role="tab" aria-selected="true" aria-controls="list-root">
+          Links
+        </button>
+        <button id="tab-texts" type="button" class="browse-tab" role="tab" aria-selected="false" aria-controls="list-root">
+          Texts
+        </button>
+      </div>
+
+      <div id="list-root"></div>
+    </main>
+
+    <div id="modal-root" hidden></div>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

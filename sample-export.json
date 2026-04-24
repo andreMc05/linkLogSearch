@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-04-23T12:00:00.000Z",
+  "urls": [
+    {
+      "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "url": "https://example.com/docs",
+      "originalLine": "example.com/docs",
+      "domain": "example.com",
+      "path": "/docs",
+      "description": "Example documentation",
+      "customHeader": "Sample batch",
+      "tags": ["demo", "docs"]
+    }
+  ],
+  "texts": [
+    {
+      "id": "ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb",
+      "content": "Remember to check the export format before importing.",
+      "description": "Remember to check the export format before importing.",
+      "tags": ["demo", "note"]
+    }
+  ],
+  "tags": ["demo", "docs", "note"]
+}
